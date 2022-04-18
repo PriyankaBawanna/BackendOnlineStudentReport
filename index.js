@@ -189,6 +189,13 @@ app.get("/addStudent", async (req, res) => {
   });
 });
 
+app.get("/loginUser", async (req, res) => {
+  User.find({}, (err, user) => {
+    console.log("Login suceessfull", user);
+    res.send(user);
+  });
+});
+
 app.listen(8085, () => {
   console.log(" Running on the localhost:8085");
 });
