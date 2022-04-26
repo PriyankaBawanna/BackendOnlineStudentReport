@@ -54,12 +54,14 @@ app.get("/", function (req, res) {
 });
 
 app.post("/login", function (req, res) {
-  const { email, password } = req.body;
+  var { email, password, id } = req.body;
   User.findOne({ email: email }, (err, user) => {
     if (user) {
       if (password === user.password) {
         console.log("Login suceessfull", user);
         res.send({ message: "Login Sucessfull", user: user });
+
+        console.log("user id", email);
       } else {
         console.log("password didn't match ");
         res.send({ message: "password didn't match", user: user });
@@ -190,10 +192,101 @@ app.get("/addStudent", async (req, res) => {
 });
 
 app.get("/loginUser", async (req, res) => {
-  User.find({}, (err, user) => {
-    console.log("Login suceessfull", user);
-    res.send(user);
+  var id = "625d830726be2de950722e42";
+  User.findById(id, function (err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("data :", data);
+      res.send(data);
+    }
   });
+});
+
+app.get("/search/:studentName", function (req, res) {
+  const regex = new RegExp(req.params.name, "i");
+  Studentinfo.find({ studentName: regex }).then((result) => {
+    res.status(200).json(result);
+  });
+});
+
+app.delete("/student/:id", async (req, res) => {
+  try {
+    const deleteStudent = await Studentinfo.findByIdAndDelete(req.params.id);
+    if (!req.params.id) {
+      return res.status(400).send();
+    }
+    res.send(deleteStudent);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+app.delete("/teacher/:id", async (req, res) => {
+  try {
+    const deleteTeacher = await Teacherinfo.findByIdAndDelete(req.params.id);
+    if (!req.params.id) {
+      return res.status(400).send();
+    }
+    res.send(deleteTeacher);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+// app.patch("//student/:id", async (req, res) => {
+//   try {
+//     const _id = req.params.id;
+//     const updateStudent = await Studentinfo.findByIdAndUpdate(_id.req.body);
+//     res.send(updateStudent);
+//   } catch (e) {
+//     res.status(400).send(updateStudent);
+//   }
+// });
+
+app.put("/studentUpdate/:id", async (req, res) => {
+  let result = await Studentinfo.updateOne(
+    { _id: req.params.id },
+    {
+      $set: req.body,
+    }
+  );
+  res.send(result);
+});
+
+app.put("/teacherUpdate/:id", async (req, res) => {
+  const updateTeacherInfo = await Teacherinfo.updateOne(
+    { _id: req.params.id },
+    { $set: req.body }
+  );
+  res.send(updateTeacherInfo);
+});
+
+app.get("/studentInfo/:id", async (req, res) => {
+  const studentData = await Studentinfo.findOne({ _id: req.params.id });
+  if (studentData) {
+    res.send(studentData);
+  } else {
+    res.send({ message: "No record Found " });
+  }
+});
+
+app.get("/teacherInfo/:id", async (req, res) => {
+  const teacherData = await Teacherinfo.findOne({ _id: req.params.id });
+  if (teacherData) {
+    res.send(teacherData);
+  } else {
+    res.send({ message: "No record Found " });
+  }
+});
+
+app.get("/profile/:id", async (req, res) => {
+  const UserProfileData = await User.findOne({ _id: req.params.id });
+  if (UserProfileData) {
+    res.send(UserProfileData);
+  } else {
+    res.send({ message: "No record Found " });
+  }
 });
 
 app.listen(8085, () => {
