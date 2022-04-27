@@ -44,15 +44,26 @@ const parentSchema = new mongoose.Schema({
   parentEmail: String,
 });
 
+const studentMarksSchema = new mongoose.Schema({
+  englishMarks: Number,
+  hindiMarks: Number,
+  science: Number,
+  socialScience: Number,
+  mathMarks: Number,
+  TotalMarks: Number,
+});
+
 const User = new mongoose.model("user", userSchema);
 const Studentinfo = new mongoose.model("student", studentSchema);
 const Teacherinfo = new mongoose.model("teacher", teacherSchema);
 const ParentInfo = new mongoose.model("parent", parentSchema);
+const studentMarks = new mongoose.model("studentMarks", studentMarksSchema);
 
 app.get("/", function (req, res) {
   res.send("Hello World");
 });
 
+//Login user
 app.post("/login", function (req, res) {
   var { email, password, id } = req.body;
   User.findOne({ email: email }, (err, user) => {
@@ -72,6 +83,8 @@ app.post("/login", function (req, res) {
     }
   });
 });
+
+//Register new user (School Admin)
 app.post("/register", function (req, res) {
   console.log(req.body);
   const { name, email, password } = req.body;
@@ -96,6 +109,8 @@ app.post("/register", function (req, res) {
     }
   });
 });
+
+//Add new Student
 
 app.post("/addStudent", function (req, res) {
   const { studentName, studentEmail, studentStandard, studentRollNo } =
@@ -122,6 +137,8 @@ app.post("/addStudent", function (req, res) {
   });
 });
 
+//add new Teacher
+
 app.post("/addTeacher", function (req, res) {
   const { teacherNo, teacherName, teacherMobileNo, teacherEmailId } = req.body;
   Teacherinfo.findOne({ teacherEmailId: teacherEmailId }, (err, teacher) => {
@@ -146,6 +163,7 @@ app.post("/addTeacher", function (req, res) {
   });
 });
 
+//add Parent
 app.post("/addParent", function (req, res) {
   const { parentName, studentRollNo, mobilenumber, parentEmail } = req.body;
   ParentInfo.findOne({ parentEmail: parentEmail }, (err, parent) => {
@@ -170,6 +188,8 @@ app.post("/addParent", function (req, res) {
   });
 });
 
+//get teacher's Data
+
 app.get("/addTeacher", async (req, res) => {
   Teacherinfo.find({}, (err, data) => {
     console.log("Teacher Data", data);
@@ -177,6 +197,7 @@ app.get("/addTeacher", async (req, res) => {
   });
 });
 
+//get Parent Data
 app.get("/addParent", async (req, res) => {
   ParentInfo.find({}, (err, data) => {
     console.log("Parent Data", data);
@@ -184,6 +205,7 @@ app.get("/addParent", async (req, res) => {
   });
 });
 
+//get Student's Data
 app.get("/addStudent", async (req, res) => {
   Studentinfo.find({}, (err, data) => {
     console.log("Add Student", data);
@@ -191,6 +213,7 @@ app.get("/addStudent", async (req, res) => {
   });
 });
 
+//get user profile
 app.get("/loginUser", async (req, res) => {
   var id = "625d830726be2de950722e42";
   User.findById(id, function (err, data) {
@@ -203,6 +226,7 @@ app.get("/loginUser", async (req, res) => {
   });
 });
 
+//search by student Name
 app.get("/search/:studentName", function (req, res) {
   const regex = new RegExp(req.params.name, "i");
   Studentinfo.find({ studentName: regex }).then((result) => {
@@ -210,6 +234,7 @@ app.get("/search/:studentName", function (req, res) {
   });
 });
 
+//Delete the Student data
 app.delete("/student/:id", async (req, res) => {
   try {
     const deleteStudent = await Studentinfo.findByIdAndDelete(req.params.id);
@@ -222,6 +247,7 @@ app.delete("/student/:id", async (req, res) => {
   }
 });
 
+//delete the teacher data
 app.delete("/teacher/:id", async (req, res) => {
   try {
     const deleteTeacher = await Teacherinfo.findByIdAndDelete(req.params.id);
@@ -234,16 +260,7 @@ app.delete("/teacher/:id", async (req, res) => {
   }
 });
 
-// app.patch("//student/:id", async (req, res) => {
-//   try {
-//     const _id = req.params.id;
-//     const updateStudent = await Studentinfo.findByIdAndUpdate(_id.req.body);
-//     res.send(updateStudent);
-//   } catch (e) {
-//     res.status(400).send(updateStudent);
-//   }
-// });
-
+//update single Student  Data
 app.put("/studentUpdate/:id", async (req, res) => {
   let result = await Studentinfo.updateOne(
     { _id: req.params.id },
@@ -254,6 +271,7 @@ app.put("/studentUpdate/:id", async (req, res) => {
   res.send(result);
 });
 
+//update single teacher data
 app.put("/teacherUpdate/:id", async (req, res) => {
   const updateTeacherInfo = await Teacherinfo.updateOne(
     { _id: req.params.id },
@@ -262,6 +280,7 @@ app.put("/teacherUpdate/:id", async (req, res) => {
   res.send(updateTeacherInfo);
 });
 
+//getting single student data
 app.get("/studentInfo/:id", async (req, res) => {
   const studentData = await Studentinfo.findOne({ _id: req.params.id });
   if (studentData) {
@@ -271,6 +290,7 @@ app.get("/studentInfo/:id", async (req, res) => {
   }
 });
 
+//getting single Teacher data
 app.get("/teacherInfo/:id", async (req, res) => {
   const teacherData = await Teacherinfo.findOne({ _id: req.params.id });
   if (teacherData) {
@@ -280,6 +300,7 @@ app.get("/teacherInfo/:id", async (req, res) => {
   }
 });
 
+//getting user profile (dynamic)
 app.get("/profile/:id", async (req, res) => {
   const UserProfileData = await User.findOne({ _id: req.params.id });
   if (UserProfileData) {
@@ -287,6 +308,67 @@ app.get("/profile/:id", async (req, res) => {
   } else {
     res.send({ message: "No record Found " });
   }
+});
+
+//Search  Student Data
+// app.get("/SearchStudentData/:id", async (req, res) => {
+//   let StudentSearch = await Studentinfo.find({
+//     $or: [
+//       {
+//         studentName: { $regex: req.params.key },
+//       },
+//       {
+//         studentEmail: { $regex: req.params.key },
+//       },
+//     ],
+//   });
+//   res.send(StudentSearch);
+// });
+
+//Add Student Marks Details
+
+app.post("/addStudentMarksStudent", function (req, res) {
+  const {
+    hindiMarks,
+    englishMarks,
+    science,
+    socialScienceMarks,
+    mathMarks,
+    TotalMarks,
+  } = req.body;
+
+  const marks = new studentMarks({
+    hindiMarks,
+    englishMarks,
+    science,
+    socialScienceMarks,
+    mathMarks,
+    TotalMarks,
+  });
+  marks.save((err) => {
+    if (err) {
+      console.log("Student Marks err");
+      res.send({ message: "error" });
+    } else {
+      res.send({ message: "Marks add successfully" });
+    }
+  });
+});
+
+/* Search API for the Student  */
+app.get("/StudentSearch/:key", async (req, resp) => {
+  let StudentSearch = await Studentinfo.find({
+    $or: [{ studentName: { $regex: req.params.key } }],
+  });
+  console.log("Student Search Result ", StudentSearch);
+  resp.send(StudentSearch);
+});
+
+app.get("/TeacherSearch/:key", async (req, res) => {
+  let TeacherSearch = await Teacherinfo.find({
+    $or: [{ teacherName: { $regex: req.params.key } }],
+  });
+  res.send(TeacherSearch);
 });
 
 app.listen(8085, () => {
