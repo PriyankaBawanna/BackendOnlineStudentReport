@@ -25,12 +25,35 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-const studentSchema = new mongoose.Schema({
+//new Student Schema
+const studentDetailsSchema = new mongoose.Schema({
   studentName: String,
   studentEmail: String,
   studentStandard: String,
   studentRollNo: String,
+
+  englishTermOneMarks: Number,
+  hindiTermOneMarks: Number,
+  scienceTermOneMarks: Number,
+  socialScienceTermOneMarks: Number,
+  mathTermOneMarks: Number,
+  totalTermOneMarks: Number,
+
+  englishTermTwoMarks: Number,
+  hindiTermTwoMarks: Number,
+  scienceTermTwoMarks: Number,
+  socialScienceTermTwoMarks: Number,
+  mathTermTwoMarks: Number,
+  totalTermTwoMarks: Number,
+
+  englishTermThreeMarks: Number,
+  hindiTermThreeMarks: Number,
+  scienceTermThreeMarks: Number,
+  socialScienceTermThreeMarks: Number,
+  mathTermThreeMarks: Number,
+  totalTermThreeMarks: Number,
 });
+//teacher Schema
 const teacherSchema = new mongoose.Schema({
   teacherNo: String,
   teacherName: String,
@@ -44,63 +67,14 @@ const parentSchema = new mongoose.Schema({
   parentEmail: String,
 });
 
-const studentMarksSheetSchema = new mongoose.Schema({
-  englishMarks: Number,
-  hindiMarks: Number,
-  science: Number,
-  socialScience: Number,
-  mathMarks: Number,
-  Total: Number,
-  studentName: String,
-  studentEmail: String,
-  studentStandard: String,
-  studentRollNo: String,
-});
-
-const studentMarksSheetSchemaTermTwo = new mongoose.Schema({
-  englishMarksTermTwo: Number,
-  hindiMarksTermTwo: Number,
-  scienceTermTwo: Number,
-  socialScienceTermTwo: Number,
-  mathMarksTermTwo: Number,
-  TotalTermTwo: Number,
-  studentName: String,
-  studentEmail: String,
-  studentStandard: String,
-  studentRollNo: String,
-});
-const studentMarksSheetSchemaTermThree = new mongoose.Schema({
-  englishMarksTermThree: Number,
-  hindiMarksTermThree: Number,
-  scienceTermThree: Number,
-  socialScienceTermThree: Number,
-  mathMarksTermThree: Number,
-  TotalTermThree: Number,
-  studentName: String,
-  studentEmail: String,
-  studentStandard: String,
-  studentRollNo: String,
-});
-
 const User = new mongoose.model("user", userSchema);
-const Studentinfo = new mongoose.model("student", studentSchema);
+
+const studentDetails = new mongoose.model(
+  "studentDetails",
+  studentDetailsSchema
+);
 const Teacherinfo = new mongoose.model("teacher", teacherSchema);
 const ParentInfo = new mongoose.model("parent", parentSchema);
-const studentMarksSheet = new mongoose.model(
-  "studentMarks",
-  studentMarksSheetSchema
-);
-const studentMarksTermTwo = new mongoose.model(
-  "studentMarksTermTwo ",
-  studentMarksSheetSchemaTermTwo
-);
-const studentMarksTermThree = new mongoose.model(
-  "studentMarksTermThree ",
-  studentMarksSheetSchemaTermThree
-);
-app.get("/", function (req, res) {
-  res.send("Hello World");
-});
 
 //Login user
 app.post("/login", function (req, res) {
@@ -149,21 +123,62 @@ app.post("/register", function (req, res) {
   });
 });
 
-//Add new Student
+//New Schema for Student Data Base
 
 app.post("/addStudent", function (req, res) {
-  const { studentName, studentEmail, studentStandard, studentRollNo } =
-    req.body;
-  Studentinfo.findOne({ studentRollNo: studentRollNo }, (err, student) => {
+  const {
+    studentName,
+    studentEmail,
+    studentStandard,
+    studentRollNo,
+    englishTermOneMarks,
+    hindiTermOneMarks,
+    scienceTermOneMarks,
+    socialScienceTermOneMarks,
+    mathTermOneMarks,
+    totalTermOneMarks,
+    englishTermTwoMarks,
+    hindiTermTwoMarks,
+    scienceTermTwoMarks,
+    socialScienceTermTwoMarks,
+    mathTermTwoMarks,
+    totalTermTwoMarks,
+    englishTermThreeMarks,
+    hindiTermThreeMarks,
+    scienceTermThreeMarks,
+    socialScienceTermThreeMarks,
+    mathTermThreeMarks,
+    totalTermThreeMarks,
+  } = req.body;
+
+  studentDetails.findOne({ studentRollNo: studentRollNo }, (err, student) => {
     if (student) {
       console.log("message: user already register");
       res.send({ message: "user already register" });
     } else {
-      const student = new Studentinfo({
+      const student = new studentDetails({
         studentName,
         studentEmail,
         studentStandard,
         studentRollNo,
+        englishTermOneMarks,
+        hindiTermOneMarks,
+        scienceTermOneMarks,
+        socialScienceTermOneMarks,
+        mathTermOneMarks,
+        totalTermOneMarks,
+        englishTermTwoMarks,
+        hindiTermTwoMarks,
+        scienceTermTwoMarks,
+        socialScienceTermTwoMarks,
+        mathTermTwoMarks,
+        totalTermTwoMarks,
+        englishTermThreeMarks,
+        hindiTermThreeMarks,
+        scienceTermThreeMarks,
+        socialScienceTermThreeMarks,
+        mathTermThreeMarks,
+        totalTermThreeMarks,
       });
       student.save((err) => {
         if (err) {
@@ -175,8 +190,6 @@ app.post("/addStudent", function (req, res) {
     }
   });
 });
-
-//add new Teacher
 
 app.post("/addTeacher", function (req, res) {
   const { teacherNo, teacherName, teacherMobileNo, teacherEmailId } = req.body;
@@ -250,7 +263,7 @@ app.get("/addParent", async (req, res) => {
 
 //get Student's Data
 app.get("/addStudent", async (req, res) => {
-  Studentinfo.find({}, (err, data) => {
+  studentDetails.find({}, (err, data) => {
     console.log("Add Student", data);
     res.send(data);
   });
@@ -269,18 +282,10 @@ app.get("/loginUser", async (req, res) => {
   });
 });
 
-//search by student Name
-app.get("/search/:studentName", function (req, res) {
-  const regex = new RegExp(req.params.name, "i");
-  Studentinfo.find({ studentName: regex }).then((result) => {
-    res.status(200).json(result);
-  });
-});
-
 //Delete the Student data
 app.delete("/student/:id", async (req, res) => {
   try {
-    const deleteStudent = await Studentinfo.findByIdAndDelete(req.params.id);
+    const deleteStudent = await studentDetails.findByIdAndDelete(req.params.id);
     if (!req.params.id) {
       return res.status(400).send();
     }
@@ -304,8 +309,9 @@ app.delete("/teacher/:id", async (req, res) => {
 });
 
 //update single Student  Data
+
 app.put("/studentUpdate/:id", async (req, res) => {
-  let result = await Studentinfo.updateOne(
+  let result = await studentDetails.updateOne(
     { _id: req.params.id },
     {
       $set: req.body,
@@ -323,9 +329,8 @@ app.put("/teacherUpdate/:id", async (req, res) => {
   res.send(updateTeacherInfo);
 });
 
-//getting single student data
 app.get("/studentInfo/:id", async (req, res) => {
-  const studentData = await Studentinfo.findOne({ _id: req.params.id });
+  const studentData = await studentDetails.findOne({ _id: req.params.id });
   if (studentData) {
     res.send(studentData);
   } else {
@@ -353,156 +358,13 @@ app.get("/profile/:id", async (req, res) => {
   }
 });
 
-app.post("/addStudentMarksStudent", function (req, res) {
-  const {
-    hindiMarks,
-    englishMarks,
-    science,
-    socialScience,
-    mathMarks,
-    Total,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  } = req.body;
-
-  const marks = new studentMarksSheet({
-    hindiMarks,
-    englishMarks,
-    science,
-    socialScience,
-    mathMarks,
-    Total,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  });
-  marks.save((err) => {
-    if (err) {
-      console.log("Student Marks err");
-      res.send({ message: "error" });
-    } else {
-      res.send({ message: "Marks add successfully" });
-    }
-  });
-});
-
-//add student MarksDetails for term two
-app.post("/addStudentMarksStudentTermTwo", function (req, res) {
-  const {
-    englishMarksTermTwo,
-    hindiMarksTermTwo,
-    scienceTermTwo,
-    socialScienceTermTwo,
-    mathMarksTermTwo,
-    TotalTermTwo,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  } = req.body;
-
-  const marksTermTwo = new studentMarksTermTwo({
-    englishMarksTermTwo,
-    hindiMarksTermTwo,
-    scienceTermTwo,
-    socialScienceTermTwo,
-    mathMarksTermTwo,
-    TotalTermTwo,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  });
-  marksTermTwo.save((err) => {
-    if (err) {
-      console.log("Student Marks err");
-      res.send({ message: "error" });
-    } else {
-      res.send({ message: "Marks add successfully" });
-    }
-  });
-});
-app.post("/addStudentMarksStudentTermThree", function (req, res) {
-  const {
-    englishMarksTermThree,
-    hindiMarksTermThree,
-    scienceTermThree,
-    socialScienceTermThree,
-    mathMarksTermThree,
-    TotalTermThree,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  } = req.body;
-
-  const marksTermThree = new studentMarksTermThree({
-    englishMarksTermThree,
-    hindiMarksTermThree,
-    scienceTermThree,
-    socialScienceTermThree,
-    mathMarksTermThree,
-    TotalTermThree,
-    studentName,
-    studentEmail,
-    studentStandard,
-    studentRollNo,
-  });
-  marksTermThree.save((err) => {
-    if (err) {
-      console.log("Student Marks err");
-      res.send({ message: "error" });
-    } else {
-      res.send({ message: "Marks add successfully" });
-    }
-  });
-});
 /* Search API for the Student  */
 app.get("/StudentSearch/:key", async (req, resp) => {
-  let StudentSearch = await Studentinfo.find({
+  let StudentSearch = await studentDetails.find({
     $or: [{ studentName: { $regex: req.params.key } }],
   });
   console.log("Student Search Result ", StudentSearch);
   resp.send(StudentSearch);
-});
-
-//get API for fetch Student Term One Data
-app.get("/TermOneStudentMarksDetails", async (req, res) => {
-  studentMarksSheet.find({}, (err, data) => {
-    console.log("Student Marks details term two ", data);
-    res.send(data);
-  });
-});
-
-//get API for fetch Student Term Two Data
-app.get("/TermTwoStudentMarksDetails", async (req, res) => {
-  studentMarksTermTwo.find({}, (err, data) => {
-    console.log("Student Marks details term two ", data);
-    res.send(data);
-  });
-});
-
-//get API for fetch Student Term Three Data
-app.get("/TermThreeStudentMarksDetails/", async (req, res) => {
-  studentMarksTermThree.find({}, (err, data) => {
-    console.log("Student Marks details term three ", data);
-    res.send(data);
-  });
-});
-
-/*get Term3 the Student Data  according student Roll No */
-app.get("/TermThree/:key", async (req, res) => {
-  if (req.params.key) {
-    let TermThree = await studentMarksTermThree.findOne({
-      $or: [{ studentRollNo: { $regex: req.params.key } }],
-    });
-    res.send(TermThree);
-  } else {
-    res.send({ message: "No Data found" });
-  }
 });
 
 app.post("/teacherLogin", async (req, res) => {
