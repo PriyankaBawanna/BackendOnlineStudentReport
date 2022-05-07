@@ -63,7 +63,7 @@ const teacherSchema = new mongoose.Schema({
 const parentSchema = new mongoose.Schema({
   parentName: String,
   studentRollNo: String,
-  mobilenumber: Number,
+  mobileNumber: Number,
   parentEmail: String,
 });
 
@@ -219,27 +219,62 @@ app.post("/addTeacher", function (req, res) {
   );
 });
 
-//add Parent--***
-app.post("/addParent", function (req, res) {
-  const { parentName, studentRollNo, mobilenumber, parentEmail } = req.body;
-  ParentInfo.findOne({ parentEmail: parentEmail }, (err, parent) => {
-    if (parent) {
-      console.log("Parent Data is already present");
-      res.send({ message: "Parent is already add" });
-    } else {
-      const parent = new ParentInfo({
-        parentName,
-        studentRollNo,
-        mobilenumber,
-        parentEmail,
-      });
-      parent.save((err) => {
-        if (err) {
-          res.send(err);
+//add Parent--*** yha par Change karna  hai
+// app.post("/addParent", function (req, res) {
+//   const { parentName, studentRollNo, mobileNumber, parentEmail } = req.body;
+//   ParentInfo.findOne({ studentRollNo: studentRollNo }, (err, parent) => {
+//     if (parent) {
+//       console.log("Parent Data is already present");
+//       res.send({ message: "Parent is already add" });
+//     } else {
+//       const parent = new ParentInfo({
+//         parentName,
+//         studentRollNo,
+//         mobileNumber,
+//         parentEmail,
+//       });
+//       parent.save((err) => {
+//         if (err) {
+//           res.send(err);
+//         } else {
+//           res.send({ message: "Sucessfully  ADD  Parent" });
+//         }
+//       });
+//     }
+//   });
+// });
+
+app.post("/addParent/:studentRollNo", function (req, res) {
+  const { parentName, studentRollNo, mobileNumber, parentEmail } = req.body;
+  studentDetails.findOne({ studentRollNo: studentRollNo }, (err, RollNo) => {
+    if (RollNo) {
+      console.log("roll no is present", studentRollNo);
+      console.log("student Roll Number");
+      ParentInfo.findOne({ parentEmail: parentEmail }, (error, Email) => {
+        if (Email) {
+          console.log("parent Details is already present ");
+          res.send({ message: "parent Details is already present " });
         } else {
-          res.send({ message: "Sucessfully  ADD  Parent" });
+          const parentDetails = new ParentInfo({
+            studentRollNo,
+            parentName,
+            parentEmail,
+            mobileNumber,
+          });
+          parentDetails.save((err) => {
+            if (err) {
+              res.send(err);
+            } else {
+              console.log("Save Parent Details ");
+
+              res.send({ message: "Parent details add successfully " });
+            }
+          });
         }
       });
+    } else {
+      console.log("roll no is not present ", RollNo);
+      res.send({ message: "Student Roll Number is not Register " });
     }
   });
 });
@@ -381,6 +416,7 @@ app.post("/teacherLogin", async (req, res) => {
   }
 });
 
+//------------yha par change karna hai
 app.post("/parentLogin", async (req, res) => {
   if (req.body.studentRollNo && req.body.parentEmail) {
     let ParentLogin = await ParentInfo.findOne(req.body);
@@ -401,6 +437,86 @@ app.get("/TeacherSearch/:key", async (req, res) => {
     $or: [{ teacherName: { $regex: req.params.key } }],
   });
   res.send(TeacherSearch);
+});
+
+//get student details according to student RollNo
+app.get("/StudentResult/:keys", async (req, res) => {
+  let StudentResult = await studentDetails.find({
+    studentRollNo: req.params.keys,
+  });
+  console.log("Student Search Result ", StudentResult);
+  res.send(StudentResult);
+});
+app.get("/StudentResultTermThree/:keys", async (req, res) => {
+  let StudentResult = await studentDetails.find(
+    {
+      studentRollNo: req.params.keys,
+    },
+    {
+      studentName: 1,
+      studentEmail: 1,
+      studentRollNo: 1,
+      studentStandard: 1,
+      studentRollNo: 1,
+
+      englishTermThreeMarks: 1,
+      hindiTermThreeMarks: 1,
+      scienceTermThreeMarks: 1,
+      socialScienceTermThreeMarks: 1,
+      mathTermThreeMarks: 1,
+      totalTermThreeMarks: 1,
+    }
+  );
+  console.log("Student Search Result ", StudentResult);
+  res.send(StudentResult);
+});
+
+app.get("/StudentResultTermTwo/:keys", async (req, res) => {
+  let StudentResult = await studentDetails.find(
+    {
+      studentRollNo: req.params.keys,
+    },
+    {
+      studentName: 1,
+      studentEmail: 1,
+      studentRollNo: 1,
+      studentStandard: 1,
+      studentRollNo: 1,
+
+      englishTermTwoMarks: 1,
+      hindiTermTwoMarks: 1,
+      scienceTermTwoMarks: 1,
+      socialScienceTermTwoMarks: 1,
+      mathTermTwoMarks: 1,
+      totalTermTwoMarks: 1,
+    }
+  );
+  console.log("Student Search Result ", StudentResult);
+  res.send(StudentResult);
+});
+
+app.get("/StudentResultTermOne/:keys", async (req, res) => {
+  let StudentResult = await studentDetails.find(
+    {
+      studentRollNo: req.params.keys,
+    },
+    {
+      studentName: 1,
+      studentEmail: 1,
+      studentRollNo: 1,
+      studentStandard: 1,
+      studentRollNo: 1,
+
+      englishTermOneMarks: 1,
+      hindiTermOneMarks: 1,
+      scienceTermOneMarks: 1,
+      socialScienceTermOneMarks: 1,
+      mathTermOneMarks: 1,
+      totalTermOneMarks: 1,
+    }
+  );
+  console.log("Student Search Result ", StudentResult);
+  res.send(StudentResult);
 });
 
 app.listen(8085, () => {
