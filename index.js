@@ -38,6 +38,8 @@ const studentDetailsSchema = new mongoose.Schema({
   socialScienceTermOneMarks: Number,
   mathTermOneMarks: Number,
   totalTermOneMarks: Number,
+  percentage: String,
+  grade: String,
 
   englishTermTwoMarks: Number,
   hindiTermTwoMarks: Number,
@@ -45,6 +47,8 @@ const studentDetailsSchema = new mongoose.Schema({
   socialScienceTermTwoMarks: Number,
   mathTermTwoMarks: Number,
   totalTermTwoMarks: Number,
+  percentageTermTwo: String,
+  gradeTermTwo: String,
 
   englishTermThreeMarks: Number,
   hindiTermThreeMarks: Number,
@@ -52,6 +56,8 @@ const studentDetailsSchema = new mongoose.Schema({
   socialScienceTermThreeMarks: Number,
   mathTermThreeMarks: Number,
   totalTermThreeMarks: Number,
+  percentageTermThree: String,
+  gradeTermThree: String,
 });
 //teacher Schema
 const teacherSchema = new mongoose.Schema({
@@ -318,13 +324,13 @@ app.get("/loginUser", async (req, res) => {
 });
 
 //Delete the Student data
-app.delete("/student/:id", async (req, res) => {
+app.delete("/studentDataDelete/:id", async (req, res) => {
   try {
     const deleteStudent = await studentDetails.findByIdAndDelete(req.params.id);
     if (!req.params.id) {
       return res.status(400).send();
     }
-    res.send(deleteStudent);
+    res.send(deleteStudent, "done ");
   } catch (e) {
     res.status(500).send(e);
   }
@@ -465,6 +471,8 @@ app.get("/StudentResultTermThree/:keys", async (req, res) => {
       socialScienceTermThreeMarks: 1,
       mathTermThreeMarks: 1,
       totalTermThreeMarks: 1,
+      percentageTermThree: 1,
+      gradeTermThree: 1,
     }
   );
   console.log("Student Search Result ", StudentResult);
@@ -489,6 +497,8 @@ app.get("/StudentResultTermTwo/:keys", async (req, res) => {
       socialScienceTermTwoMarks: 1,
       mathTermTwoMarks: 1,
       totalTermTwoMarks: 1,
+      percentageTermTwo: 1,
+      gradeTermTwo: 1,
     }
   );
   console.log("Student Search Result ", StudentResult);
@@ -513,6 +523,8 @@ app.get("/StudentResultTermOne/:keys", async (req, res) => {
       socialScienceTermOneMarks: 1,
       mathTermOneMarks: 1,
       totalTermOneMarks: 1,
+      percentage: 1,
+      grade: 1,
     }
   );
   console.log("Student Search Result ", StudentResult);
