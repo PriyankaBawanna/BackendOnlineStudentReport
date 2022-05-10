@@ -324,13 +324,13 @@ app.get("/loginUser", async (req, res) => {
 });
 
 //Delete the Student data
-app.delete("/studentDataDelete/:id", async (req, res) => {
+app.delete("/student/:id", async (req, res) => {
   try {
     const deleteStudent = await studentDetails.findByIdAndDelete(req.params.id);
     if (!req.params.id) {
       return res.status(400).send();
     }
-    res.send(deleteStudent, "done ");
+    res.send(deleteStudent);
   } catch (e) {
     res.status(500).send(e);
   }
