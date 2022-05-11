@@ -40,6 +40,7 @@ const studentDetailsSchema = new mongoose.Schema({
   totalTermOneMarks: Number,
   percentage: String,
   grade: String,
+  termOneResultStatus: String,
 
   englishTermTwoMarks: Number,
   hindiTermTwoMarks: Number,
@@ -72,6 +73,29 @@ const parentSchema = new mongoose.Schema({
   mobileNumber: Number,
   parentEmail: String,
 });
+
+const resultStatusSchema = new mongoose.Schema({
+  studentRollNo: String,
+  termOneResultStatus: String,
+  termTwoResultStatus: String,
+});
+const resultStatusSchemaTermTwo = new mongoose.Schema({
+  studentRollNo: String,
+  termTwoResultStatus: String,
+});
+const resultStatusSchemaTermThree = new mongoose.Schema({
+  studentRollNo: String,
+  termThreeResultStatus: String,
+});
+const resultStatusThree = new mongoose.model(
+  "resultStatusThree",
+  resultStatusSchemaTermThree
+);
+const resultStatusTermTwo = new mongoose.model(
+  "resultStatusTermTwo",
+  resultStatusSchemaTermTwo
+);
+const resultStatus = new mongoose.model("resultStatus", resultStatusSchema);
 
 const User = new mongoose.model("user", userSchema);
 
@@ -155,6 +179,10 @@ app.post("/addStudent", function (req, res) {
     socialScienceTermThreeMarks,
     mathTermThreeMarks,
     totalTermThreeMarks,
+    percentageTermThree,
+    gradeTermThree,
+    percentageTermTwo,
+    gradeTermTwo,
   } = req.body;
 
   studentDetails.findOne({ studentRollNo: studentRollNo }, (err, student) => {
@@ -185,6 +213,9 @@ app.post("/addStudent", function (req, res) {
         socialScienceTermThreeMarks,
         mathTermThreeMarks,
         totalTermThreeMarks,
+        percentageTermThree,
+
+        percentageTermTwo,
       });
       student.save((err) => {
         if (err) {
@@ -224,31 +255,6 @@ app.post("/addTeacher", function (req, res) {
     }
   );
 });
-
-//add Parent--*** yha par Change karna  hai
-// app.post("/addParent", function (req, res) {
-//   const { parentName, studentRollNo, mobileNumber, parentEmail } = req.body;
-//   ParentInfo.findOne({ studentRollNo: studentRollNo }, (err, parent) => {
-//     if (parent) {
-//       console.log("Parent Data is already present");
-//       res.send({ message: "Parent is already add" });
-//     } else {
-//       const parent = new ParentInfo({
-//         parentName,
-//         studentRollNo,
-//         mobileNumber,
-//         parentEmail,
-//       });
-//       parent.save((err) => {
-//         if (err) {
-//           res.send(err);
-//         } else {
-//           res.send({ message: "Sucessfully  ADD  Parent" });
-//         }
-//       });
-//     }
-//   });
-// });
 
 app.post("/addParent/:studentRollNo", function (req, res) {
   const { parentName, studentRollNo, mobileNumber, parentEmail } = req.body;
@@ -453,6 +459,7 @@ app.get("/StudentResult/:keys", async (req, res) => {
   console.log("Student Search Result ", StudentResult);
   res.send(StudentResult);
 });
+
 app.get("/StudentResultTermThree/:keys", async (req, res) => {
   let StudentResult = await studentDetails.find(
     {
@@ -506,10 +513,8 @@ app.get("/StudentResultTermTwo/:keys", async (req, res) => {
 });
 
 app.get("/StudentResultTermOne/:keys", async (req, res) => {
-  let StudentResult = await studentDetails.find(
-    {
-      studentRollNo: req.params.keys,
-    },
+  let result = await studentDetails.find(
+    { studentRollNo: req.params.keys },
     {
       studentName: 1,
       studentEmail: 1,
@@ -525,12 +530,222 @@ app.get("/StudentResultTermOne/:keys", async (req, res) => {
       totalTermOneMarks: 1,
       percentage: 1,
       grade: 1,
+      termOneResultStatus: 1,
     }
   );
-  console.log("Student Search Result ", StudentResult);
-  res.send(StudentResult);
+  if (result) {
+    res.send(result);
+  } else {
+    res.send("error");
+  }
+});
+
+app.post("/StudentResultStatus/:studentRollNo", function (req, res) {
+  const { studentRollNo, termOneResultStatus, termTwoResultStatus } = req.body;
+  studentDetails.findOne(
+    { studentRollNo: studentRollNo },
+    (err, RollNumber) => {
+      if (RollNumber) {
+        console.log(" 1. Roll Number is  present");
+        resultStatus.findOne(
+          { studentRollNo: studentRollNo },
+          (err, StudentRollNumber) => {
+            if (StudentRollNumber) {
+              console.log("2. Student Roll Number is presnet In  Term Schema");
+              resultStatus.findOne(
+                { termOneResultStatus: termOneResultStatus },
+                (err, termOneResultStatus) => {
+                  if (termOneResultStatus) {
+                    res.send({ message: "Status Already update" });
+                  } else {
+                    console.log("3 need to save the status ");
+
+                    const resultStatus = new resultStatus({
+                      studentRollNo,
+                      termOneResultStatus,
+                    });
+                    resultStatus.save((err) => {
+                      if (err) {
+                        res.send(err);
+                      } else {
+                        console.log("Result status Add Successfully");
+                        res.send({ message: "Result status Add Successfully" });
+                      }
+                    });
+                  }
+                }
+              );
+            } else {
+              console.log(
+                "Student  Roll Number  is not Present  is Term Status Schema"
+              );
+              const resultStatus = new resultStatus({
+                studentRollNo,
+                termOneResultStatus,
+                termTwoResultStatus,
+              });
+              resultStatus.save((err) => {
+                if (err) {
+                  res.send(err);
+                } else {
+                  console.log("Result status Add Successfully");
+                  res.send({ message: "Result status Add Successfully" });
+                }
+              });
+            }
+          }
+        );
+      } else {
+        console.log("Roll Number is not present");
+        res.send({ message: "Roll Number is not present" });
+      }
+    }
+  );
+});
+
+// app.post("/status/:StudentRollNo", (req, res) => {
+//   const { studentRollNo, termOneResultStatus, termTwoResultStatus } = req.body;
+//   studentDetails.find(
+//     { studentRollNo: studentRollNo },
+//     (err, studentRollNo) => {
+//       if (studentRollNo) {
+//         resultStatus.findOne(
+//           { studentRollNo: studentRollNo },
+//           (err, studentRollNumber) => {
+//             if (studentRollNumber) {
+//               resultStatus.findOne(
+//                 { termOneResultStatus: termOneResultStatus },
+//                 (err, termOneResultStatus) => {
+//                   if (termOneResultStatus) {
+//                     res.send({ message: "Status Already update" });
+//                   } else {
+//                     const result = new resultStatus({
+//                       studentRollNo,
+//                       termOneResultStatus,
+//                     });
+//                     result.save((err) => {
+//                       if (err) {
+//                         res.send(err);
+//                       } else {
+//                         console.log("Result status Add Successfully");
+//                         res.send({ message: "Result status Add Successfully" });
+//                       }
+//                     });
+//                   }
+//                 }
+//               );
+//             } else {
+//               const result = new resultStatus({
+//                 studentRollNo,
+//                 termOneResultStatus,
+//               });
+//               result.save((err) => {
+//                 if (err) {
+//                   res.send(err);
+//                 } else {
+//                   console.log("Result status Add Successfully");
+//                   res.send({ message: "Result status Add Successfully" });
+//                 }
+//               });
+//             }
+//           }
+//         );
+//       } else {
+//         res.send({ message: "Roll number nahi hai " });
+//       }
+//     }
+//   );
+// });
+
+app.post("/status/:studentRollNo", function (req, res) {
+  const { studentRollNo, termOneResultStatus } = req.body;
+  studentDetails.findOne({ studentRollNo: studentRollNo }, (err, RollNo) => {
+    if (RollNo) {
+      resultStatus.findOne(
+        { studentRollNo: studentRollNo },
+        (err, RollNumber) => {
+          if (RollNumber) {
+            res.send({ message: "Already update" });
+          } else {
+            const result = new resultStatus({
+              studentRollNo,
+              termOneResultStatus,
+            });
+            result.save((err) => {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send({ message: "Result status Add Successfully" });
+              }
+            });
+          }
+        }
+      );
+    } else {
+      res.send({ message: "Roll number nahi hai " });
+    }
+  });
+});
+app.post("/statusTermTwo/:studentRollNo", function (req, res) {
+  const { studentRollNo, termTwoResultStatus } = req.body;
+  studentDetails.findOne({ studentRollNo: studentRollNo }, (err, RollNo) => {
+    if (RollNo) {
+      resultStatusTermTwo.findOne(
+        { studentRollNo: studentRollNo },
+        (err, RollNumber) => {
+          if (RollNumber) {
+            res.send({ message: "Already update" });
+          } else {
+            const result = new resultStatusTermTwo({
+              studentRollNo,
+              termTwoResultStatus,
+            });
+            result.save((err) => {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send({ message: "Result status Add Successfully" });
+              }
+            });
+          }
+        }
+      );
+    } else {
+      res.send({ message: "Roll number nahi hai " });
+    }
+  });
+});
+app.post("/statusTermThree/:studentRollNo", function (req, res) {
+  const { studentRollNo, termThreeResultStatus } = req.body;
+  studentDetails.findOne({ studentRollNo: studentRollNo }, (err, RollNo) => {
+    if (RollNo) {
+      resultStatusThree.findOne(
+        { studentRollNo: studentRollNo },
+        (err, RollNumber) => {
+          if (RollNumber) {
+            res.send({ message: "Already updated" });
+          } else {
+            const result = new resultStatusThree({
+              studentRollNo,
+              termThreeResultStatus,
+            });
+            result.save((err) => {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send({ message: "Result status Add Successfully" });
+              }
+            });
+          }
+        }
+      );
+    } else {
+      res.send({ message: "Roll number nahi hai " });
+    }
+  });
 });
 
 app.listen(8085, () => {
   console.log(" Running on the localhost:8085");
 });
+resultStatusThree;
