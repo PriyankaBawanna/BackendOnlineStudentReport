@@ -1,7 +1,22 @@
+//require("dotenv").config();
+import "dotenv/config";
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { application } from "express";
+import nodemailer from "nodemailer";
+
+var transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
 
 const app = express();
 app.use(express.json());
@@ -77,7 +92,7 @@ const parentSchema = new mongoose.Schema({
 const resultStatusSchema = new mongoose.Schema({
   studentRollNo: String,
   termOneResultStatus: String,
-  termTwoResultStatus: String,
+  // termTwoResultStatus: String,
 });
 const resultStatusSchemaTermTwo = new mongoose.Schema({
   studentRollNo: String,
@@ -330,18 +345,39 @@ app.get("/loginUser", async (req, res) => {
 });
 
 //Delete the Student data
-app.delete("/student/:id", async (req, res) => {
-  try {
-    const deleteStudent = await studentDetails.findByIdAndDelete(req.params.id);
-    if (!req.params.id) {
-      return res.status(400).send();
-    }
-    res.send(deleteStudent);
-  } catch (e) {
-    res.status(500).send(e);
-  }
+// app.delete("/student/:Roll", async (req, res) => {
+//   try {
+//     const deleteStudent = await studentDetails.findByIdAndDelete(
+//       req.params.Roll
+//     );
+
+//     if (!req.params.Roll) {
+//       return res.status(400).send();
+//     }
+//     res.send(deleteStudent);
+//   } catch (e) {
+//     res.status(500).send(e);
+//   }
+// });
+
+app.delete("/StudentDelete/:RollNo", function (req, res) {
+  studentDetails
+    .deleteOne({ studentRollNo: req.params.RollNo })
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.status(500).send(e);
+    });
 });
 
+app.delete("/parentDelete/:RollNo", function (req, res) {
+  ParentInfo.deleteOne({ studentRollNo: req.params.RollNo })
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((err) => {});
+});
 //delete the teacher data
 app.delete("/teacher/:id", async (req, res) => {
   try {
@@ -568,8 +604,8 @@ app.post("/StudentResultStatus/:studentRollNo", function (req, res) {
                       if (err) {
                         res.send(err);
                       } else {
-                        console.log("Result status Add Successfully");
-                        res.send({ message: "Result status Add Successfully" });
+                        console.log("Response Submitted");
+                        res.send({ message: "Response Submitted" });
                       }
                     });
                   }
@@ -588,8 +624,8 @@ app.post("/StudentResultStatus/:studentRollNo", function (req, res) {
                 if (err) {
                   res.send(err);
                 } else {
-                  console.log("Result status Add Successfully");
-                  res.send({ message: "Result status Add Successfully" });
+                  console.log("Response Submitted");
+                  res.send({ message: "Response Submitted" });
                 }
               });
             }
@@ -602,60 +638,6 @@ app.post("/StudentResultStatus/:studentRollNo", function (req, res) {
     }
   );
 });
-
-// app.post("/status/:StudentRollNo", (req, res) => {
-//   const { studentRollNo, termOneResultStatus, termTwoResultStatus } = req.body;
-//   studentDetails.find(
-//     { studentRollNo: studentRollNo },
-//     (err, studentRollNo) => {
-//       if (studentRollNo) {
-//         resultStatus.findOne(
-//           { studentRollNo: studentRollNo },
-//           (err, studentRollNumber) => {
-//             if (studentRollNumber) {
-//               resultStatus.findOne(
-//                 { termOneResultStatus: termOneResultStatus },
-//                 (err, termOneResultStatus) => {
-//                   if (termOneResultStatus) {
-//                     res.send({ message: "Status Already update" });
-//                   } else {
-//                     const result = new resultStatus({
-//                       studentRollNo,
-//                       termOneResultStatus,
-//                     });
-//                     result.save((err) => {
-//                       if (err) {
-//                         res.send(err);
-//                       } else {
-//                         console.log("Result status Add Successfully");
-//                         res.send({ message: "Result status Add Successfully" });
-//                       }
-//                     });
-//                   }
-//                 }
-//               );
-//             } else {
-//               const result = new resultStatus({
-//                 studentRollNo,
-//                 termOneResultStatus,
-//               });
-//               result.save((err) => {
-//                 if (err) {
-//                   res.send(err);
-//                 } else {
-//                   console.log("Result status Add Successfully");
-//                   res.send({ message: "Result status Add Successfully" });
-//                 }
-//               });
-//             }
-//           }
-//         );
-//       } else {
-//         res.send({ message: "Roll number nahi hai " });
-//       }
-//     }
-//   );
-// });
 
 app.post("/status/:studentRollNo", function (req, res) {
   const { studentRollNo, termOneResultStatus } = req.body;
@@ -675,7 +657,7 @@ app.post("/status/:studentRollNo", function (req, res) {
               if (err) {
                 res.send(err);
               } else {
-                res.send({ message: "Result status Add Successfully" });
+                res.send({ message: "Response Submitted" });
               }
             });
           }
@@ -704,7 +686,8 @@ app.post("/statusTermTwo/:studentRollNo", function (req, res) {
               if (err) {
                 res.send(err);
               } else {
-                res.send({ message: "Result status Add Successfully" });
+                console.log("is time par humko mail send karna hai ");
+                res.send({ message: "Response Submitted" });
               }
             });
           }
@@ -733,19 +716,97 @@ app.post("/statusTermThree/:studentRollNo", function (req, res) {
               if (err) {
                 res.send(err);
               } else {
-                res.send({ message: "Result status Add Successfully" });
+                res.send({ message: "Response Submitted" });
               }
             });
           }
         }
       );
     } else {
-      res.send({ message: "Roll number nahi hai " });
+      res.send({ message: "Roll number not found " });
     }
   });
 });
 
-app.listen(8085, () => {
-  console.log(" Running on the localhost:8085");
+app.get("/getResultStatus/:roll", async (req, res) => {
+  let resultStatusTermThree = await resultStatusThree.find(
+    { studentRollNo: req.params.roll },
+
+    { _id: 0, studentRollNo: 1, termThreeResultStatus: 1 }
+  );
+  console.log("Student Roll no");
+  if (resultStatusTermThree) {
+    var mailOptions = {
+      from: process.env.EMAIL,
+      to: "priyankabawanna123@gmail.com",
+      subject: "Parent Action of Student Result ",
+      text: `Parent Response  : ${resultStatusTermThree}`,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("email has been sent ", info.response);
+      }
+    });
+    res.send({ message: "Mail has been Sent " });
+  } else {
+    res.send("error");
+  }
 });
-resultStatusThree;
+
+app.get("/getResultStatusTermTwo/:roll", async (req, res) => {
+  let statusTermTwo = await resultStatusTermTwo.find(
+    { studentRollNo: req.params.roll },
+
+    { _id: 0, studentRollNo: 1, termTwoResultStatus: 1 }
+  );
+  console.log("Student Roll no");
+  if (statusTermTwo) {
+    var mailOptions = {
+      from: process.env.EMAIL,
+      to: "priyankabawanna123@gmail.com",
+      subject: "Parent Action of Student Result ",
+      text: `Parent Response  : ${statusTermTwo}`,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("email has been sent ", info.response);
+      }
+    });
+    res.send({ message: "Mail has been Sent " });
+  } else {
+    res.send("error");
+  }
+});
+app.get("/getResultStatusTermOne/:roll", async (req, res) => {
+  let statusTermOne = await resultStatus.find(
+    { studentRollNo: req.params.roll },
+
+    { _id: 0, studentRollNo: 1, termOneResultStatus: 1 }
+  );
+  console.log("Student Roll no");
+  if (statusTermOne) {
+    var mailOptions = {
+      from: process.env.EMAIL,
+      to: "priyankabawanna123@gmail.com",
+      subject: "Parent Action of Student Result ",
+      text: `Parent Response  : ${statusTermOne}`,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("email has been sent ", info.response);
+      }
+    });
+    res.send({ message: "Mail has been Sent " });
+  } else {
+    res.send("error");
+  }
+});
+app.listen(process.env.PORT, () => {
+  console.log(" Running on the localhost:", process.env.PORT);
+});
